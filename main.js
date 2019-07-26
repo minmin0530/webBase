@@ -55,6 +55,10 @@ el_hitarea.addEventListener(EVENTNAME_TOUCHEND, function(event) {
 
 const ai6 = new AI6GL();
 
+const cursor = new Cube(1.0, 1.0, 1.0, 1.0, 1.0);
+cursor.setPosition(2.0 * 0.22, 2.0 * 0.22, 2.0 * 0.22);
+ai6.addObject(cursor);
+
 const cubeArray = [];
 const CUBE_NUM = 8;
 const CUBE_NUM_3 = 2;
@@ -76,8 +80,8 @@ const light1 = [0.0, 0.0, 0.0];
 const light2 = [110.0, 110.0, 0.0];
 const light3 = [0.0, 110.0, 110.0];
 const light4 = [-110.0, 110.0, 0.0];
-const light5 = [-110.0, 110.0, -110.0];
-const eye = [0.0, 5.0, -5.0];
+const light5 = [-110.0, 110.0, 110.0];
+const eye = [0.0, 5.0, 5.0];
 const target = [0.0, 0.0, 0.0];
 const up = [0.0, 1.0, 0.0];
 
@@ -97,12 +101,13 @@ function mainLoop() {
   light1[1] = 130.0;
   light1[2] = Math.sin(this.time*0.1) * 100;
   if (touchFlag) {
-      eye[0] += (divX-moveX) / 1000;
-      eye[2] += (divY-moveY) / 1000;
+      cursor.x -= (divX-moveX) / 1000;
+      cursor.y += (divY-moveY) / 1000;
   }
   ai6.draw(ai6.GL);
   requestAnimationFrame( mainLoop );
   for (const cube of cubeArray) {
       cube.update();
   }
+  cursor.update();
 }
