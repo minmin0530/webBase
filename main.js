@@ -55,41 +55,46 @@ el_hitarea.addEventListener(EVENTNAME_TOUCHEND, function(event) {
 
 const ai6 = new AI6GL();
 
-const cursor = new Cube(1.0, 1.0, 1.0, 1.0, 1.0);
+const cursor = new Cube(1.0, 0.0, 0.0, 1.0, 1.0);
 cursor.setPosition(2.0 * 0.22, 2.0 * 0.22, 2.0 * 0.22);
 ai6.addObject(cursor);
 
-const cubeArray = [];
-const CUBE_NUM = 8;
-const CUBE_NUM_3 = 2;
-let i = 0;
-for (let j = 0; j < CUBE_NUM_3; ++j) {
-for (let k = 0; k < CUBE_NUM_3; ++k) {
-for (let l = 0; l < CUBE_NUM_3; ++l) {
-    if (j == 0 || j == CUBE_NUM_3 - 1 ||
-        k == 0 || k == CUBE_NUM_3 - 1 ||
-        l == 0 || l == CUBE_NUM_3 - 1 )
-    {
-        cubeArray.push(new BigCube(j*2, k*2, l*2, ai6));
-        ++i;
+const wall = [];
+for (let x = 0; x < 5; ++x) {
+  for (let y = 0; y < 5; ++y) {
+    for (let z = 0; z < 5; ++z) {
+      if (x == 0 || x == 4 ||
+        y == 0 || y == 4 ||
+        z == 0) {
+        const w = new Cube(Math.random(), Math.random(), Math.random(), 1.0, 3.0);
+        w.setPosition(x * 3-5 , y * 3-5 , z * 3 -10);
+        ai6.addObject(w);
+        wall.push(w);
+      }
     }
+  }
 }
-}
-}
+
+let ballSpeedX = 0.03;
+let ballSpeedY = 0.02;
+let ballSpeedZ = 0.01;
+const ball = new Cube(0.0, 1.0, 0.0, 1.0, 1.0);
+ai6.addObject(ball);
+
 const light1 = [0.0, 0.0, 0.0];
-const light2 = [110.0, 110.0, 0.0];
-const light3 = [0.0, 110.0, 110.0];
-const light4 = [-110.0, 110.0, 0.0];
-const light5 = [-110.0, 110.0, 110.0];
-const eye = [0.0, 5.0, 5.0];
+// const light2 = [0.0, 0.0, 0.0];
+// const light3 = [0.0, 0.0, 0.0];
+// const light4 = [0.0, 0.0, 0.0];
+// const light5 = [0.0, 0.0, 0.0];
+const eye = [0.0, 0.0, 7.0];
 const target = [0.0, 0.0, 0.0];
 const up = [0.0, 1.0, 0.0];
 
 ai6.addLight(light1);
-ai6.addLight(light2);
-ai6.addLight(light3);
-ai6.addLight(light4);
-ai6.addLight(light5);
+// ai6.addLight(light2);
+// ai6.addLight(light3);
+// ai6.addLight(light4);
+// ai6.addLight(light5);
 ai6.setCamera(eye, target, up);
 
 ai6.fetchShader(ai6.GL, mainLoop);
@@ -97,17 +102,28 @@ ai6.fetchShader(ai6.GL, mainLoop);
 this.time = 0.0;
 function mainLoop() {
   this.time += 0.1;
-  light1[0] = Math.cos(this.time*0.1) * 100;
-  light1[1] = 130.0;
-  light1[2] = Math.sin(this.time*0.1) * 100;
+  // light1[0] = Math.cos(this.time*0.1) * 100;
+  // light1[1] = 130.0;
+  // light1[2] = Math.sin(this.time*0.1) * 100;
   if (touchFlag) {
       cursor.x -= (divX-moveX) / 1000;
       cursor.y += (divY-moveY) / 1000;
   }
+  if (ball.x > 5 || ball.x <   -5) { ballSpeedX *= -1; }
+  if (ball.y > 5 || ball.y <   -5) { ballSpeedY *= -1; }
+  if (ball.z >  0 || ball.z < -10) { ballSpeedZ *= -1; }
+  ball.x += ballSpeedX;
+  ball.y += ballSpeedY;
+  ball.z -= ballSpeedZ;
+  light1[0] = ball.x;
+  light1[1] = ball.y;
+  light1[2] = ball.z;
+  
   ai6.draw(ai6.GL);
   requestAnimationFrame( mainLoop );
-  for (const cube of cubeArray) {
-      cube.update();
+  for (const w of wall) {
+    w.update();
   }
+  ball.update();
   cursor.update();
 }
